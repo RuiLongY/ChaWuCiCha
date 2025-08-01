@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查无此茶点单系统</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f9f3e9;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            position: relative;
+            min-height: 90vh;
+        }
+        h1 {
+            text-align: center;
+            color: #d4a76a;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .menu-section {
+            margin-bottom: 30px;
+            border-bottom: 1px dashed #d4a76a;
+            padding-bottom: 20px;
+        }
+        .section-title {
+            color: #d4a76a;
+            font-size: 22px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .price {
+            font-size: 16px;
+            color: #888;
+        }
+        .menu-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        .menu-item {
+            background-color: #fff9f0;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .menu-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            background-color: #fff5e6;
+        }
+        .item-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #d4a76a;
+        }
+        .item-desc {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .order-panel {
+            margin-top: 30px;
+            background-color: #fff9f0;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .order-title {
+            color: #d4a76a;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        .order-list {
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .order-total {
+            font-weight: bold;
+            text-align: right;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        .action-btns {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-confirm {
+            background-color: #d4a76a;
+            color: white;
+        }
+        .btn-cancel {
+            background-color: #f1f1f1;
+            color: #666;
+        }
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 25px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            animation: modalopen 0.3s;
+        }
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .modal-title {
+            font-size: 22px;
+            color: #d4a76a;
+            margin: 0;
+        }
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: #333;
+        }
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        .modal-desc {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .size-options {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+        }
+        .size-btn {
+            padding: 10px 15px;
+            border: 1px solid #d4a76a;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            flex: 1;
+            margin: 0 5px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .size-btn:hover {
+            background-color: #fff5e6;
+        }
+        .size-btn.selected {
+            background-color: #d4a76a;
+            color: white;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .btn-add {
+            background-color: #d4a76a;
+            color: white;
+            padding: 10px 25px;
+        }
+        
+        /* 叫号按钮 */
+        .call-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background-color: #d4a76a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        .call-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+        
+        /* 大屏显示按钮 */
+        .screen-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #6a8fd4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        .screen-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+        
+        /* 取餐号显示 */
+        .order-number {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #d4a76a;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        /* 叫号弹窗 */
+        .call-modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+        }
+        .call-modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+            animation: modalopen 0.3s;
+        }
+        .call-number-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        .call-number-item {
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .call-number-item.preparing {
+            background-color: #fff5e6;
+        }
+        .call-number-item.ready {
+            background-color: #e6f7e6;
+            border-left: 4px solid #5cb85c;
+        }
+        .call-number-item.called {
+            background-color: #e6f7ff;
+            border-left: 4px solid #5bc0de;
+        }
+        .call-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #d4a76a;
+        }
+        .call-time {
+            font-size: 14px;
+            color: #888;
+            margin: 5px 0;
+        }
+        .call-order-details {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #eee;
+        }
+        .call-order-detail {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        .call-action-btns {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+            gap: 10px;
+        }
+        .btn-ready {
+            background-color: #5cb85c;
+            color: white;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+        .btn-call {
+            background-color: #5bc0de;
+            color: white;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+        .btn-pickedup {
+            background-color: #5cb85c;
+            color: white;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+        
+        /* 大屏显示 */
+        .screen-modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+        }
+        .screen-container {
+            display: flex;
+            height: 100vh;
+        }
+        .screen-column {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .screen-column:first-child {
+            border-right: 1px solid #eee;
+            background-color: #fff9f0;
+        }
+        .screen-title {
+            font-size: 24px;
+            color: #d4a76a;
+            margin-bottom: 20px;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #d4a76a;
+        }
+        .screen-order-item {
+            padding: 15px;
+            margin: 10px 0;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .screen-order-item.preparing {
+            border-left: 4px solid #f0ad4e;
+        }
+        .screen-order-item.ready {
+            border-left: 4px solid #5cb85c;
+        }
+        .screen-order-item.called {
+            border-left: 4px solid #5bc0de;
+        }
+        .screen-order-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #d4a76a;
+        }
+        .screen-order-time {
+            font-size: 14px;
+            color: #888;
+            margin: 5px 0;
+        }
+        .screen-order-details {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #eee;
+        }
+        .screen-order-detail {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+        }
+        .screen-close-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #d4a76a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="order-number">当前取餐号: <span id="currentOrderNumber">V77001</span></div>
+        <h1>查无此茶点单系统</h1>
+        
+        <div class="menu-section">
+            <div class="section-title">
+                <span>经典奶茶系列</span>
+                <span class="price">中杯12元 / 大杯15元</span>
+            </div>
+            <div class="menu-items">
+                <div class="menu-item" onclick="showItemModal('原味珍珠奶茶', '丝滑奶茶搭配Q弹珍珠', 12, 15)">
+                    <div class="item-name">原味珍珠奶茶</div>
+                    <div class="item-desc">丝滑奶茶搭配Q弹珍珠</div>
+                </div>
+                <div class="menu-item" onclick="showItemModal('椰果奶茶', '香甜椰果丰富口感', 12, 15)">
+                    <div class="item-name">椰果奶茶</div>
+                    <div class="item-desc">香甜椰果丰富口感</div>
+                </div>
+                <div class="menu-item" onclick="showItemModal('红豆奶茶', '绵密红豆增添甜蜜', 12, 15)">
+                    <div class="item-name">红豆奶茶</div>
+                    <div class="item-desc">绵密红豆增添甜蜜</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="menu-section">
+            <div class="section-title">
+                <span>鲜奶特调系列</span>
+                <span class="price">中杯15元 / 大杯18元</span>
+            </div>
+            <div class="menu-items">
+                <div class="menu-item" onclick="showItemModal('鲜牛乳抹茶拿铁', '鲜牛乳与抹茶融合，茶香醇厚', 15, 18)">
+                    <div class="item-name">鲜牛乳抹茶拿铁</div>
+                    <div class="item-desc">鲜牛乳与抹茶融合，茶香醇厚</div>
+                </div>
+                <div class="menu-item" onclick="showItemModal('燕麦鲜奶红茶', '燕麦软糯，红茶鲜奶碰撞出独特风味', 15, 18)">
+                    <div class="item-name">燕麦鲜奶红茶</div>
+                    <div class="item-desc">燕麦软糯，红茶鲜奶碰撞出独特风味</div>
+                </div>
+                <div class="menu-item" onclick="showItemModal('厚乳咖啡拿铁', '浓郁厚乳与咖啡完美结合', 15, 18)">
+                    <div class="item-name">厚乳咖啡拿铁</div>
+                    <div class="item-desc">浓郁厚乳与咖啡完美结合</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="menu-section">
+            <div class="section-title">
+                <span>水果茶系列</span>
+                <span class="price">中杯13元 / 大杯16元</span>
+            </div>
+            <div class="menu-items">
+                <div class="menu-item" onclick="showItemModal('满杯橙子', '满满橙子果肉，酸甜爽口', 13, 16)">
+                    <div class="item-name">满杯橙子</div>
+                    <div class="item-desc">满满橙子果肉，酸甜爽口</div>
+                </div>
+                <div class="menu-item" onclick="showItemModal('蜜桃乌龙水果茶', '蜜桃香气与乌龙茶香交织', 13, 16)">
+                    <div class="item-name">蜜桃乌龙水果茶</div>
+                    <div class="item-desc">蜜桃香气与乌龙茶香交织</div>
+                </div>
+                <div class="menu-item" onclick="showItemModal('青提茉莉茶', '青提的清甜搭配茉莉的清香', 13, 16)">
+                    <div class="item-name">青提茉莉茶</div>
+                    <div class="item-desc">青提的清甜搭配茉莉的清香</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="menu-section">
+            <div class="section-title">
+                <span>冰沙系列</span>
+                <span class="price">中份22元 / 大份28元</span>
+            </div>
+            <div class="menu-items">
+                <div class="menu-item" onclick="showItemModal('芒果冰沙', '香甜芒果，冰爽可口', 22, 28, '中份', '大份')">
+                    <div class="item-name">芒果冰沙</div>
+                    <div class="item-desc">香甜芒果，冰爽可口</div>
+                </div>
+                <div class="menu-item" onclick="showItemModal('草莓冰沙', '新鲜草莓打造，少女心满满', 22, 28, '中份', '大份')">
+                    <div class="item-name">草莓冰沙</div>
+                    <div class="item-desc">新鲜草莓打造，少女心满满</div>
+                </div>
+                <div class="menu-item" onclick="showItemModal('蓝莓冰沙', '富含蓝莓营养，酸甜冰沙滋味', 22, 28, '中份', '大份')">
+                    <div class="item-name">蓝莓冰沙</div>
+                    <div class="item-desc">富含蓝莓营养，酸甜冰沙滋味</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="menu-section">
+            <div class="section-title">
+                <span>特色奶盖系列</span>
+                <span class="price">中杯14元 / 大杯17元</span>
+            </div>
+            <div class="menu-items">
+                <div class="menu-item" onclick="showItemModal('红茶奶盖', '醇厚红茶搭配咸香奶盖', 14, 17)">
+                    <div class="item-name">红茶奶盖</div>
+                    <div class="item-desc">醇厚红茶搭配咸香奶盖</div>
+                </div>
+                <div class="menu-item" onclick="showItemModal('绿茶奶盖', '清新绿茶，奶盖绵密', 14, 17)">
+                    <div class="item-name">绿茶奶盖</div>
+                    <div class="item-desc">清新绿茶，奶盖绵密</div>
+                </div>
+                <div class="menu-item" onclick="showItemModal('乌龙茶奶盖', '乌龙茶香，层次丰富', 14, 17)">
+                    <div class="item-name">乌龙茶奶盖</div>
+                    <div class="item-desc">乌龙茶香，层次丰富</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="menu-section">
+            <div class="section-title">
+                <span>养生花茶系列</span>
+                <span class="price">中杯10元 / 大杯13元</span>
+            </div>
+            <div class="menu-items">
+                <div class="menu-item" onclick="showItemModal('玫瑰枸杞茶', '养颜美容，香气宜人', 10, 13)">
+                    <div class="item-name">玫瑰枸杞茶</div>
+                    <div class="item-desc">养颜美容，香气宜人</div>
+                </div>
+                <div class="menu-item" onclick="showItemModal('柠檬薄荷茶', '清爽提神，夏日必备', 10, 13)">
+                    <div class="item-name">柠檬薄荷茶</div>
+                    <div class="item-desc">清爽提神，夏日必备</div>
+                </div>
+                <div class="menu-item" onclick="showItemModal('红枣桂圆茶', '滋补养生，温暖身心', 10, 13)">
+                    <div class="item-name">红枣桂圆茶</div>
+                    <div class="item-desc">滋补养生，温暖身心</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="order-panel">
+            <div class="order-title">当前订单</div>
+            <div class="order-list" id="orderList">
+                <!-- 订单项将在这里动态添加 -->
+            </div>
+            <div class="order-total">
+                总计: <span id="totalAmount">0</span>元
+            </div>
+            <div class="action-btns">
+                <button class="btn btn-cancel" onclick="clearOrder()">清空订单</button>
+                <button class="btn btn-confirm" onclick="confirmOrder()">确认下单</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 商品详情弹窗 -->
+    <div id="itemModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalItemName"></h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p class="modal-desc" id="modalItemDesc"></p>
+                <div class="size-options">
+                    <div class="size-btn" id="sizeSmall" onclick="selectSizeOption(this)"></div>
+                    <div class="size-btn" id="sizeLarge" onclick="selectSizeOption(this)"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-add" onclick="addToOrderFromModal()">加入订单</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 叫号弹窗 -->
+    <div id="callModal" class="call-modal">
+        <div class="call-modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">订单管理</h2>
+                <span class="close" onclick="closeCallModal()">&times;</span>
+            </div>
+            <div class="call-number-list" id="callNumberList">
+                <!-- 待叫号订单将在这里动态添加 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 大屏显示 -->
+    <div id="screenModal" class="screen-modal">
+        <div class="screen-container">
+            <div class="screen-column">
+                <h3 class="screen-title">制作中</h3>
+                <div id="preparingOrders">
+                    <!-- 制作中的订单将在这里动态添加 -->
+                </div>
+            </div>
+            <div class="screen-column">
+                <h3 class="screen-title">可取餐</h3>
+                <div id="readyOrders">
+                    <!-- 可取的订单将在这里动态添加 -->
+                </div>
+            </div>
+        </div>
+        <button class="screen-close-btn" onclick="closeScreenModal()">关闭大屏</button>
+    </div>
+    
+    <!-- 叫号按钮 -->
+    <button class="call-btn" onclick="showCallModal()">
+        订单管理
+    </button>
+    
+    <!-- 大屏显示按钮 -->
+    <button class="screen-btn" onclick="showScreenModal()">
+        大屏显示
+    </button>
+
+    <script>
+        let currentOrder = [];
+        let totalAmount = 0;
+        let currentOrderNumber = 1;
+        let selectedItem = null;
+        let selectedSize = null;
+        let selectedPrice = 0;
+        let allOrders = []; // 存储所有订单
+        
+        // 生成V77XXX格式的取餐号
+        function generateOrderNumber() {
+            return `V77${currentOrderNumber.toString().padStart(3, '0')}`;
+        }
+        
+        // 显示商品详情弹窗
+        function showItemModal(name, desc, priceSmall, priceLarge, sizeSmallName = '中杯', sizeLargeName = '大杯') {
+            selectedItem = name;
+            document.getElementById('modalItemName').textContent = name;
+            document.getElementById('modalItemDesc').textContent = desc;
+            
+            // 设置杯型选项
+            document.getElementById('sizeSmall').textContent = `${sizeSmallName} ${priceSmall}元`;
+            document.getElementById('sizeSmall').dataset.price = priceSmall;
+            document.getElementById('sizeSmall').dataset.size = sizeSmallName;
+            
+            document.getElementById('sizeLarge').textContent = `${sizeLargeName} ${priceLarge}元`;
+            document.getElementById('sizeLarge').dataset.price = priceLarge;
+            document.getElementById('sizeLarge').dataset.size = sizeLargeName;
+            
+            // 清除之前的选择
+            document.getElementById('sizeSmall').classList.remove('selected');
+            document.getElementById('sizeLarge').classList.remove('selected');
+            selectedSize = null;
+            selectedPrice = 0;
+            
+            // 显示弹窗
+            document.getElementById('itemModal').style.display = 'block';
+        }
+        
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('itemModal').style.display = 'none';
+        }
+        
+        // 选择杯型
+        function selectSizeOption(btn) {
+            // 移除同组其他按钮的选中状态
+            const siblings = btn.parentElement.querySelectorAll('.size-btn');
+            siblings.forEach(sib => sib.classList.remove('selected'));
+            
+            // 添加选中状态
+            btn.classList.add('selected');
+            
+            // 记录选择
+            selectedSize = btn.dataset.size;
+            selectedPrice = parseFloat(btn.dataset.price);
+        }
+        
+        // 从弹窗加入订单
+        function addToOrderFromModal() {
+            if (!selectedSize) {
+                alert('请选择杯型！');
+                return;
+            }
+            
+            // 检查是否已存在相同饮品和杯型
+            const existingItemIndex = currentOrder.findIndex(
+                item => item.name === selectedItem && item.size === selectedSize
+            );
+            
+            if (existingItemIndex !== -1) {
+                // 如果已存在，增加数量
+                currentOrder[existingItemIndex].quantity++;
+                currentOrder[existingItemIndex].totalPrice += selectedPrice;
+            } else {
+                // 否则添加新项
+                currentOrder.push({
+                    name: selectedItem,
+                    size: selectedSize,
+                    price: selectedPrice,
+                    quantity: 1,
+                    totalPrice: selectedPrice
+                });
+            }
+            
+            // 更新总金额
+            totalAmount += selectedPrice;
+            
+            // 更新订单显示
+            updateOrderDisplay();
+            
+            // 关闭弹窗
+            closeModal();
+        }
+        
+        // 更新订单显示
+        function updateOrderDisplay() {
+            const orderListElement = document.getElementById('orderList');
+            const totalAmountElement = document.getElementById('totalAmount');
+            
+            // 清空现有内容
+            orderListElement.innerHTML = '';
+            
+            // 添加每个订单项
+            currentOrder.forEach(item => {
+                const orderItemElement = document.createElement('div');
+                orderItemElement.className = 'order-item';
+                orderItemElement.innerHTML = `
+                    <span>${item.name} (${item.size}) × ${item.quantity}</span>
+                    <span>${item.totalPrice}元</span>
+                `;
+                orderListElement.appendChild(orderItemElement);
+            });
+            
+            // 更新总金额
+            totalAmountElement.textContent = totalAmount;
+        }
+        
+        // 清空订单
+        function clearOrder() {
+            currentOrder = [];
+            totalAmount = 0;
+            updateOrderDisplay();
+        }
+        
+        // 确认下单
+        function confirmOrder() {
+            if (currentOrder.length === 0) {
+                alert('请先选择饮品！');
+                return;
+            }
+            
+            // 生成取餐号
+            const orderNumber = generateOrderNumber();
+            
+            // 创建订单对象
+            const order = {
+                number: orderNumber,
+                items: [...currentOrder],
+                total: totalAmount,
+                time: new Date(),
+                status: 'preparing', // preparing, ready, called
+                called: false
+            };
+            
+            // 添加到所有订单列表
+            allOrders.push(order);
+            
+            // 更新当前取餐号显示
+            document.getElementById('currentOrderNumber').textContent = generateOrderNumber();
+            
+            // 递增取餐号
+            currentOrderNumber++;
+            
+            // 在实际应用中，这里可以发送订单到服务器或打印小票
+            alert(`订单已提交！取餐号: ${orderNumber}\n总金额: ${totalAmount}元`);
+            
+            // 清空当前订单
+            clearOrder();
+            
+            // 更新大屏显示
+            updateScreenDisplay();
+        }
+        
+        // 显示叫号弹窗
+        function showCallModal() {
+            const callNumberList = document.getElementById('callNumberList');
+            callNumberList.innerHTML = '';
+            
+            // 按状态分组订单
+            const preparingOrders = allOrders.filter(order => order.status === 'preparing');
+            const readyOrders = allOrders.filter(order => order.status === 'ready');
+            const calledOrders = allOrders.filter(order => order.status === 'called');
+            
+            // 如果没有订单
+            if (allOrders.length === 0) {
+                callNumberList.innerHTML = '<p style="text-align: center; color: #888;">暂无订单</p>';
+            } else {
+                // 添加制作中的订单
+                if (preparingOrders.length > 0) {
+                    const preparingHeader = document.createElement('h3');
+                    preparingHeader.textContent = '制作中';
+                    preparingHeader.style.color = '#f0ad4e';
+                    preparingHeader.style.margin = '20px 0 10px 0';
+                    callNumberList.appendChild(preparingHeader);
+                    
+                    preparingOrders.forEach(order => {
+                        callNumberList.appendChild(createCallOrderElement(order));
+                    });
+                }
+                
+                // 添加已备餐的订单
+                if (readyOrders.length > 0) {
+                    const readyHeader = document.createElement('h3');
+                    readyHeader.textContent = '已完成备餐';
+                    readyHeader.style.color = '#5cb85c';
+                    readyHeader.style.margin = '20px 0 10px 0';
+                    callNumberList.appendChild(readyHeader);
+                    
+                    readyOrders.forEach(order => {
+                        callNumberList.appendChild(createCallOrderElement(order));
+                    });
+                }
+                
+                // 添加已叫号的订单
+                if (calledOrders.length > 0) {
+                    const calledHeader = document.createElement('h3');
+                    calledHeader.textContent = '已叫号';
+                    calledHeader.style.color = '#5bc0de';
+                    calledHeader.style.margin = '20px 0 10px 0';
+                    callNumberList.appendChild(calledHeader);
+                    
+                    calledOrders.forEach(order => {
+                        callNumberList.appendChild(createCallOrderElement(order));
+                    });
+                }
+            }
+            
+            document.getElementById('callModal').style.display = 'block';
+        }
+        
+        // 创建叫号订单元素
+        function createCallOrderElement(order) {
+            const orderElement = document.createElement('div');
+            orderElement.className = `call-number-item ${order.status}`;
+            
+            let actionButtons = '';
+            if (order.status === 'preparing') {
+                actionButtons = `
+                    <div class="call-action-btns">
+                        <button class="btn btn-ready" onclick="markAsReady('${order.number}')">已完成备餐</button>
+                    </div>
+                `;
+            } else if (order.status === 'ready') {
+                actionButtons = `
+                    <div class="call-action-btns">
+                        <button class="btn btn-call" onclick="callNumber('${order.number}')">叫号</button>
+                        <button class="btn btn-pickedup" onclick="markAsPickedUp('${order.number}')">订单已完成</button>
+                    </div>
+                `;
+            } else if (order.status === 'called') {
+                actionButtons = `
+                    <div class="call-action-btns">
+                        <button class="btn btn-pickedup" onclick="markAsPickedUp('${order.number}')">确认已取餐</button>
+                    </div>
+                `;
+            }
+            
+            orderElement.innerHTML = `
+                <div class="call-number">${order.number}</div>
+                <div class="call-time">下单时间: ${formatTime(order.time)}</div>
+                <div class="call-order-details">
+                    ${createOrderDetailsHtml(order)}
+                </div>
+                ${actionButtons}
+            `;
+            
+            return orderElement;
+        }
+        
+        // 创建订单详情HTML
+        function createOrderDetailsHtml(order) {
+            let itemsHtml = '';
+            order.items.forEach(item => {
+                itemsHtml += `
+                    <div class="call-order-detail">
+                        <span>${item.name} (${item.size}) × ${item.quantity}</span>
+                        <span>${item.totalPrice}元</span>
+                    </div>
+                `;
+            });
+            
+            return itemsHtml + `
+                <div class="call-order-detail" style="font-weight: bold; margin-top: 10px; border-top: 1px solid #eee; padding-top: 5px;">
+                    <span>总计</span>
+                    <span>${order.total}元</span>
+                </div>
+            `;
+        }
+        
+        // 标记订单为已完成备餐
+        function markAsReady(number) {
+            const order = allOrders.find(o => o.number === number);
+            if (order) {
+                order.status = 'ready';
+                updateCallModal();
+                updateScreenDisplay();
+                alert(`订单 ${number} 已标记为已完成备餐！`);
+            }
+        }
+        
+        // 执行叫号
+        function callNumber(number) {
+            const order = allOrders.find(o => o.number === number);
+            if (order) {
+                order.status = 'called';
+                updateCallModal();
+                updateScreenDisplay();
+                alert(`叫号: ${number} 请取餐！`);
+            }
+        }
+        
+        // 标记订单为已取餐
+        function markAsPickedUp(number) {
+            // 从订单列表中移除已取餐的订单
+            allOrders = allOrders.filter(order => order.number !== number);
+            
+            // 更新弹窗和大屏
+            updateCallModal();
+            updateScreenDisplay();
+            
+            alert(`订单 ${number} 已标记为已取餐！`);
+        }
+        
+        // 更新叫号弹窗
+        function updateCallModal() {
+            showCallModal();
+        }
+        
+        // 关闭叫号弹窗
+        function closeCallModal() {
+            document.getElementById('callModal').style.display = 'none';
+        }
+        
+        // 显示大屏
+        function showScreenModal() {
+            updateScreenDisplay();
+            document.getElementById('screenModal').style.display = 'block';
+        }
+        
+        // 关闭大屏
+        function closeScreenModal() {
+            document.getElementById('screenModal').style.display = 'none';
+        }
+        
+        // 更新大屏显示
+        function updateScreenDisplay() {
+            const preparingOrders = document.getElementById('preparingOrders');
+            const readyOrders = document.getElementById('readyOrders');
+            
+            preparingOrders.innerHTML = '';
+            readyOrders.innerHTML = '';
+            
+            // 筛选制作中的订单
+            const preparing = allOrders.filter(order => order.status === 'preparing');
+            if (preparing.length === 0) {
+                preparingOrders.innerHTML = '<p style="text-align: center; color: #888;">暂无制作中的订单</p>';
+            } else {
+                preparing.forEach(order => {
+                    const orderElement = createScreenOrderElement(order);
+                    orderElement.classList.add('preparing');
+                    preparingOrders.appendChild(orderElement);
+                });
+            }
+            
+            // 筛选可取的订单（包括已备餐和已叫号的）
+            const ready = allOrders.filter(order => order.status === 'ready' || order.status === 'called');
+            if (ready.length === 0) {
+                readyOrders.innerHTML = '<p style="text-align: center; color: #888;">暂无可以取餐的订单</p>';
+            } else {
+                ready.forEach(order => {
+                    const orderElement = createScreenOrderElement(order);
+                    if (order.status === 'ready') {
+                        orderElement.classList.add('ready');
+                    } else if (order.status === 'called') {
+                        orderElement.classList.add('called');
+                    }
+                    readyOrders.appendChild(orderElement);
+                });
+            }
+        }
+        
+        // 创建大屏订单元素
+        function createScreenOrderElement(order) {
+            const orderElement = document.createElement('div');
+            orderElement.className = 'screen-order-item';
+            
+            let itemsHtml = '';
+            order.items.forEach(item => {
+                itemsHtml += `
+                    <div class="screen-order-detail">
+                        <span>${item.name} (${item.size}) × ${item.quantity}</span>
+                        <span>${item.totalPrice}元</span>
+                    </div>
+                `;
+            });
+            
+            let statusText = '';
+            if (order.status === 'preparing') {
+                statusText = '(制作中)';
+            } else if (order.status === 'ready') {
+                statusText = '(已备餐)';
+            } else if (order.status === 'called') {
+                statusText = '(已叫号)';
+            }
+            
+            orderElement.innerHTML = `
+                <div class="screen-order-number">${order.number} ${statusText}</div>
+                <div class="screen-order-time">下单时间: ${formatTime(order.time)}</div>
+                <div class="screen-order-details">
+                    ${itemsHtml}
+                    <div class="screen-order-detail" style="font-weight: bold; margin-top: 10px; border-top: 1px solid #eee; padding-top: 5px;">
+                        <span>总计</span>
+                        <span>${order.total}元</span>
+                    </div>
+                </div>
+            `;
+            
+            return orderElement;
+        }
+        
+        // 格式化时间
+        function formatTime(date) {
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+        
+        // 点击弹窗外部关闭弹窗
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('itemModal')) {
+                closeModal();
+            }
+            if (event.target == document.getElementById('callModal')) {
+                closeCallModal();
+            }
+        }
+        
+        // 初始化当前取餐号
+        document.getElementById('currentOrderNumber').textContent = generateOrderNumber();
+    </script>
+</body>
+</html>
